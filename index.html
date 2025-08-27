@@ -3,25 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Text To Speech Converter</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Text to Voice App</title>
+    <link rel="stylesheet" href="conversation.css">
 </head>
 <body>
-    <div class="hero">
-        <h1>Text To Speech <span>Converter</span></h1>
-        <textarea placeholder="Write anything here..."></textarea>
-        <div class="row">
-            <select></select>
-            <button><img src="images/play.png">Listen</button>
-        </div>
-        <br>
-        <br>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+        <span id="themeIcon">🌙</span>
+    </button>
 
-        <div class="love">
-            Made with &hearts; by Shivansh Nautiyal
-        </div>
+    <div class="container">
+        <header class="app-header">
+            <h1 class="app-title">Text to Voice</h1>
+            <p class="app-subtitle">Convert your text to natural speech</p>
+        </header>
+
+        <main class="card">
+            <!-- Accessibility announcements -->
+            <div id="announcements" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+            <!-- Unsupported browser warning -->
+            <div id="unsupportedWarning" class="error" style="display: none;">
+                <strong>Speech Synthesis Not Supported</strong><br>
+                Your browser doesn't support the Speech Synthesis API. Please try a modern browser like Chrome, Firefox, Safari, or Edge.
+            </div>
+
+            <form id="ttsForm">
+                <!-- Text Input -->
+                <div class="form-group">
+                    <label for="textInput" class="form-label">
+                        Text to Speak
+                        <span class="help-tooltip" data-tooltip="Enter the text you want to convert to speech"></span>
+                    </label>
+                    <div class="textarea-container">
+                        <textarea 
+                            id="textInput" 
+                            class="form-textarea" 
+                            placeholder="Enter your text here..."
+                            maxlength="5000"
+                            aria-describedby="charCounter"
+                        ></textarea>
+                        <div id="charCounter" class="char-counter">0 / 5000</div>
+                    </div>
+                    
+                    <!-- Sample Text Presets -->
+                    <div class="presets">
+                        <button type="button" class="preset-btn" data-lang="en" data-text="Hello! Welcome to our Text to Voice application. This is a sample text in English.">English Sample</button>
+                        <button type="button" class="preset-btn" data-lang="hi" data-text="नमस्ते! हमारे टेक्स्ट टू वॉयस एप्लिकेशन में आपका स्वागत है। यह हिंदी में एक नमूना पाठ है।">Hindi Sample</button>
+                        <button type="button" class="preset-btn" data-lang="de" data-text="Hallo! Willkommen in unserer Text-zu-Sprache-Anwendung. Dies ist ein Beispieltext auf Deutsch.">German Sample</button>
+                        <button type="button" class="preset-btn" data-lang="fr" data-text="Bonjour! Bienvenue dans notre application de synthèse vocale. Ceci est un exemple de texte en français.">French Sample</button>
+                    </div>
+                </div>
+
+                <!-- Controls Grid -->
+                <div class="controls-grid">
+                    <!-- Language Selection -->
+                    <div class="form-group">
+                        <label for="languageSelect" class="form-label">Language</label>
+                        <select id="languageSelect" class="form-select" aria-describedby="languageHelp">
+                            <option value="en">English</option>
+                            <option value="hi">Hindi</option>
+                            <option value="de">German</option>
+                            <option value="fr">French</option>
+                        </select>
+                    </div>
+
+                    <!-- Voice Selection -->
+                    <div class="form-group">
+                        <label for="voiceSelect" class="form-label">Voice</label>
+                        <select id="voiceSelect" class="form-select" aria-describedby="voiceHelp">
+                            <option value="">Loading voices...</option>
+                        </select>
+                        <div id="voiceWarning" class="warning" style="display: none;">
+                            No voices available for the selected language. The system will use the default voice.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Audio Controls -->
+                <div class="controls-grid">
+                    <!-- Rate Control -->
+                    <div class="form-group">
+                        <div class="slider-group">
+                            <div class="slider-label">
+                                <span>Rate</span>
+                                <span class="slider-value" id="rateValue">1.0</span>
+                            </div>
+                            <input 
+                                type="range" 
+                                id="rateSlider" 
+                                class="form-range" 
+                                min="0.5" 
+                                max="2.0" 
+                                step="0.1" 
+                                value="1.0"
+                                aria-label="Speech rate"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Pitch Control -->
+                    <div class="form-group">
+                        <div class="slider-group">
+                            <div class="slider-label">
+                                <span>Pitch</span>
+                                <span class="slider-value" id="pitchValue">1.0</span>
+                            </div>
+                            <input 
+                                type="range" 
+                                id="pitchSlider" 
+                                class="form-range" 
+                                min="0" 
+                                max="2" 
+                                step="0.1" 
+                                value="1.0"
+                                aria-label="Speech pitch"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Volume Control -->
+                    <div class="form-group">
+                        <div class="slider-group">
+                            <div class="slider-label">
+                                <span>Volume</span>
+                                <span class="slider-value" id="volumeValue">1.0</span>
+                            </div>
+                            <input 
+                                type="range" 
+                                id="volumeSlider" 
+                                class="form-range" 
+                                min="0" 
+                                max="1" 
+                                step="0.1" 
+                                value="1.0"
+                                aria-label="Speech volume"
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Control Buttons -->
+                <div class="buttons">
+                    <button type="button" id="playBtn" class="btn btn-primary">
+                        <span id="playIcon">▶️</span>
+                        <span id="playText">Play</span>
+                    </button>
+                    <button type="button" id="pauseBtn" class="btn btn-secondary" disabled>
+                        <span>⏸️</span>
+                        <span id="pauseText">Pause</span>
+                    </button>
+                    <button type="button" id="stopBtn" class="btn btn-danger" disabled>
+                        <span>⏹️</span>
+                        <span>Stop</span>
+                    </button>
+                </div>
+            </form>
+        </main>
     </div>
-    
-<script src="script.js"></script>
+<script src="conversation.js"></script>
 </body>
 </html>
